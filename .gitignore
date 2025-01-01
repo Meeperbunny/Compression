@@ -1,0 +1,6 @@
+# Ignore Bazel output dirs and the lockfile
+bazel-*
+MODULE.bazel.lock
+
+# Ignore .vscode configuration files
+.vscode
