@@ -31,6 +31,6 @@ TEST(HuffmanTest, MobyDickTest) {
     Huffman h;
 
     // Check that they are equal.
-    bytestring s_encoded = h.Encode(s);
-    EXPECT_EQ(s, s);
+    bitstring s_encoded = h.Encode(s);
+    EXPECT_EQ(s, h.Decode(s_encoded));
 }

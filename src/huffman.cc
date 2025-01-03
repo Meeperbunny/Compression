@@ -24,7 +24,7 @@ void fillSymbolMap(HuffmanNode* node, std::unordered_map<char, std::string> &map
     }
 }
 
-bytestring Huffman::Encode(std::string text) {
+bitstring Huffman::Encode(std::string text) {
     std::unordered_map<char, double> frequencies;
     for(const auto& c : text)
         ++frequencies[c];
@@ -41,22 +41,21 @@ bytestring Huffman::Encode(std::string text) {
         Q.push({-v, new HuffmanNode(v, k)});
     }
     while(Q.size() > 1) {
-        HuffmanNode *first;
-        HuffmanNode *second;
-        first = Q.top().second;
+        auto [freqFirst, firstNode] = Q.top();
         Q.pop();
-        second = Q.top().second;
+        auto [freqSecond, secondNode] = Q.top();
         Q.pop();
 
-        HuffmanNode* newNode = new HuffmanNode(first->frequency + second->frequency);
-        newNode->left = first, newNode->right = second;
+        HuffmanNode* newNode = new HuffmanNode(freqFirst + freqSecond);
+        newNode->left = firstNode;
+        newNode->right = secondNode;
 
         Q.push({newNode->frequency, newNode});
     }
     root = Q.top().second;
 
     // Now that we have a tree generate binary encodings.
-    std::unordered_map<char, std::string> symbolMap;
+    symbolMap = std::unordered_map<char, std::string>{};
     fillSymbolMap(root, symbolMap);
 
     // Now that we have the symbol map, encode the text as a vector of bytes.
@@ -64,11 +63,33 @@ bytestring Huffman::Encode(std::string text) {
     for(const auto& c : text) {
         binaryString += symbolMap[c];
     }
-    bytestring b = BytestringFromString(binaryString);
-    std::cerr << "Encoded original string of " << text.size() << " bytes to have " << b.size() << " bytes." << std::endl;
+    bitstring b = BytestringFromString(binaryString);
+
+    // If we are decoding and encoding, ensure that we only do one at a time.
     return b;
 }
 
-std::string Huffman::Decode(std::string text) {
+std::string Huffman::Decode(bitstring bstring) {
+    std::string text{};
+
+    // Invert symbol map.
+    std::unordered_map<std::string, char> symbolMapInverse;
+    for(auto &[k, v] : symbolMap) {
+        symbolMapInverse[v] = k;
+    }
+
+    std::string current{};
+    for(const auto& b : bstring) {
+        current += b ? "1" : "0";
+        auto it = symbolMapInverse.find(current);
+        if (it != symbolMapInverse.end()) {
+            // Is found in the mapping, so decode it.
+            text += it->second;
+            current = "";
+        }
+    }
+    if (current.size())
+        throw std::runtime_error("Error decoding the given bitstring");
+
     return text;
 }

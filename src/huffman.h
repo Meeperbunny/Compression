@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 #include "src/types.h"
 
@@ -18,9 +19,10 @@ class Huffman {
 private:
     HuffmanNode* root;
     std::vector<HuffmanNode*> nodes;
+    std::unordered_map<char, std::string> symbolMap;
 public:
-    bytestring Encode(std::string text);
-    std::string Decode(std::string text);
+    bitstring Encode(std::string);
+    std::string Decode(bitstring);
 };
 
 #endif /* HUFFMAN */
